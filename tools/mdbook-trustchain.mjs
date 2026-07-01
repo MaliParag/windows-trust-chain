@@ -4,49 +4,137 @@
  *
  * The book's Markdown is authored for a Pandoc+Typst print pipeline and is kept
  * byte-identical to the upstream manuscript so it can be re-synced easily. This
- * preprocessor adapts it to mdBook (pulldown-cmark / CommonMark) at build time,
+ * preprocessor reproduces, for mdBook (pulldown-cmark / CommonMark), the same
+ * designed components the print/HTML build emits from design/lua/trustchain.lua,
  * without editing the source files:
  *
- *   1. `::: trust-ledger ... :::`  ->  a styled <div class="trust-ledger"> block
- *      (Pandoc fenced_div syntax that CommonMark does not understand).
- *   2. Image paths `](diagrams/x.svg)` -> `](../diagrams/x.svg)` so figures in
- *      src/{chapters,front-matter,back-matter}/ resolve to src/diagrams/.
- *   3. Reference-list items `1. [Name]: ...` -> `1. \[Name\]: ...` so a leading
- *      `[label]:` is not silently consumed as a link-reference definition.
+ *   1. `::: trust-ledger ... :::`            -> <div class="trust-ledger">
+ *   2. Blockquotes led by an emoji tier
+ *      `> 🟢/🟡/🔵 **CAPTURED/...**`          -> <div class="evidence evidence-TIER">
+ *      (the following code block is welded to it by theme/trustchain.css).
+ *   3. Blockquotes led by a bold label
+ *      `> **Key idea.** ...`                 -> <div class="callout callout-KIND">
+ *      classified with the same label->kind map as the print build.
+ *   4. Image paths `](diagrams/x.svg)`       -> `](../diagrams/x.svg)`
+ *   5. Reference-list items `1. [Name]: ..`  -> `1. \[Name\]: ..` (keep visible).
  *
  * Protocol: https://rust-lang.github.io/mdBook/for_developers/preprocessors.html
- *   `<cmd> supports <renderer>`  -> exit 0 if supported.
- *   otherwise: read [context, book] JSON on stdin, write the book JSON on stdout.
  */
 'use strict';
 
+// label (lowercased prefix) -> callout kind. Mirrors CALLOUT_KIND in
+// design/lua/trustchain.lua. Longest keys are matched first.
+const CALLOUT_KIND = {
+  'definition': 'definition',
+  'key idea': 'insight', 'key takeaway': 'insight', 'takeaway': 'insight',
+  'chapter thesis': 'insight', 'thesis': 'insight', 'insight': 'insight',
+  'aside': 'aside',
+  'quoted source': 'quote', 'quoted anchor': 'quote', 'source quotation': 'quote',
+  'primary-source quotation': 'quote', 'primary source quotation': 'quote',
+  'quotation': 'quote', 'quote': 'quote', 'pull quote': 'quote',
+  'diagram in prose': 'figure',
+  'note': 'note', 'sidenote': 'note', 'side note': 'note', 'sidebar': 'note',
+  'margin note': 'note', 'source note': 'note', 'anti-confusion': 'note',
+  'evidence note': 'note', 'evidence labels': 'note', 'where this sits': 'note',
+  'bequeaths': 'note', 'honest labelling': 'note', 'honest labeling': 'note',
+  'foundations': 'foundations',
+  'tip': 'insight', 'how to': 'walkthrough', 'step by step': 'walkthrough',
+  'warning': 'warning', 'caution': 'warning', 'pitfall': 'warning', 'gotcha': 'warning',
+};
+const CALLOUT_KEYS = Object.keys(CALLOUT_KIND).sort((a, b) => b.length - a.length);
+
+const TIER = { '🟢': 'captured', '🟡': 'emulated', '🔵': 'documented' };
+
+function classify(lead) {
+  const low = lead.toLowerCase();
+  for (const k of CALLOUT_KEYS) {
+    if (low.startsWith(k)) return CALLOUT_KIND[k];
+  }
+  if (/ is not | are not |isn'?t |aren'?t | vs\.? | versus |not the same|≠/.test(low)) {
+    return 'warning';
+  }
+  return 'note';
+}
+
+// Wrap a run of blockquote lines. `original` is the untouched `>`-prefixed run;
+// `inner` is the same run with the leading `> ` stripped.
+function wrapBlockquote(original, inner) {
+  const firstIdx = inner.findIndex((l) => l.trim() !== '');
+  if (firstIdx < 0) return original;
+  const first = inner[firstIdx].trim();
+
+  for (const [emoji, tier] of Object.entries(TIER)) {
+    if (first.startsWith(emoji)) {
+      return [`<div class="evidence evidence-${tier}">`, '', ...inner, '', '</div>'];
+    }
+  }
+
+  const m = first.match(/^\*\*(.+?)\*\*/);
+  if (m) {
+    const kind = classify(m[1]);
+    const cls = kind === 'figure' ? 'figure-prose' : `callout callout-${kind}`;
+    return [`<div class="${cls}">`, '', ...inner, '', '</div>'];
+  }
+
+  return original; // generic blockquote, leave as-is
+}
+
 function transform(content) {
-  // 1. Pandoc fenced div `::: trust-ledger` -> HTML div wrapping Markdown.
-  //    Blank lines around the tags let CommonMark render the inner Markdown.
   const lines = content.split('\n');
   const out = [];
-  let inLedger = false;
-  for (const line of lines) {
-    if (!inLedger && /^:::\s*trust-ledger\s*$/.test(line)) {
-      inLedger = true;
-      out.push('<div class="trust-ledger">', '');
+  let i = 0;
+  let inCode = false;
+  let fence = '';
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const fenceOpen = line.match(/^\s*(```+|~~~+)/);
+
+    if (inCode) {
+      out.push(line);
+      if (fenceOpen && line.trim().startsWith(fence)) { inCode = false; fence = ''; }
+      i++;
       continue;
     }
-    if (inLedger && /^:::\s*$/.test(line)) {
-      inLedger = false;
+    if (fenceOpen) {
+      inCode = true;
+      fence = fenceOpen[1];
+      out.push(line);
+      i++;
+      continue;
+    }
+
+    // A `::: trust-ledger` fenced div (Pandoc) -> styled HTML div.
+    if (/^:::\s*trust-ledger\s*$/.test(line)) {
+      out.push('<div class="trust-ledger">', '');
+      i++;
+      while (i < lines.length && !/^:::\s*$/.test(lines[i])) { out.push(lines[i]); i++; }
+      i++; // skip closing :::
       out.push('', '</div>');
       continue;
     }
+
+    // A blockquote run (contiguous `>`-prefixed lines).
+    if (/^>/.test(line)) {
+      const original = [];
+      while (i < lines.length && /^>/.test(lines[i])) { original.push(lines[i]); i++; }
+      const inner = original.map((l) => l.replace(/^>\s?/, ''));
+      out.push(...wrapBlockquote(original, inner));
+      continue;
+    }
+
     out.push(line);
+    i++;
   }
+
   let text = out.join('\n');
 
-  // 2. Rewrite diagram image paths for the one-level-deep source layout.
+  // Rewrite diagram image paths for the one-level-deep source layout.
   text = text.replace(/\]\(diagrams\//g, '](../diagrams/');
   text = text.replace(/(<img[^>]*\bsrc=")diagrams\//g, '$1../diagrams/');
 
-  // 3. Escape a leading `[label]:` in ordered/unordered list items so it is not
-  //    parsed as a link-reference definition (which renders nothing).
+  // Escape a leading `[label]:` in list items so it is not parsed as a link
+  // reference definition (which renders nothing).
   text = text.replace(/^(\s*(?:\d+\.|[-*])\s+)\[([^\]]+)\]:/gm, '$1\\[$2\\]:');
 
   return text;
@@ -64,10 +152,7 @@ function walk(items) {
 
 function main() {
   const args = process.argv.slice(2);
-  if (args[0] === 'supports') {
-    // Support every renderer; transforms are renderer-agnostic HTML/Markdown.
-    process.exit(0);
-  }
+  if (args[0] === 'supports') process.exit(0);
 
   let input = '';
   process.stdin.setEncoding('utf8');

@@ -30,7 +30,7 @@ control has to live somewhere else. You do not need to be an expert in all four
 domains the chain spans (almost nobody is), which is why the book opens with a
 short Foundations chapter that levels the vocabulary before Part I begins.
 
-## A word about how this book was written, and why you should verify it
+## A word about how this book was written
 
 This book was produced by a multi-agent writing pipeline that I designed and
 operate. I chose the topics, set the editorial bar, audited the output, and own
