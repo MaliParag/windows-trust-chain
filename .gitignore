@@ -1,0 +1,11 @@
+# Build output
+/book/
+
+# Dependencies / tooling
+/node_modules/
+/.tools/
+
+# Editor / OS noise
+.DS_Store
+*.swp
+Thumbs.db
