@@ -42,6 +42,13 @@ mdbook serve --open   # live-reload preview at http://localhost:3000
 mdbook build          # static site into ./book
 ```
 
+Deploys additionally run a post-build SEO pass (canonical URLs, Open Graph and
+Twitter cards, `schema.org/Book` JSON-LD, `sitemap.xml`, and `robots.txt`):
+
+```bash
+SITE_URL=https://maliparag.github.io/windows-trust-chain node tools/gen-seo.mjs
+```
+
 If you edit which chapters exist or their order, regenerate the table of
 contents:
 
@@ -62,7 +69,8 @@ node tools/gen-summary.mjs   # rewrites src/SUMMARY.md from the reading order
 ├── theme/trustchain.css    Styling for the trust-ledger blocks and figures
 ├── tools/
 │   ├── gen-summary.mjs      Regenerates src/SUMMARY.md in canonical reading order
-│   └── mdbook-trustchain.mjs mdBook preprocessor (trust-ledger blocks, figures)
+│   ├── mdbook-trustchain.mjs mdBook preprocessor (trust-ledger, callouts, evidence, figures)
+│   └── gen-seo.mjs          Post-build SEO: canonical, Open Graph, JSON-LD, sitemap, robots
 ├── book.toml               mdBook configuration
 └── .github/workflows/      Build and deploy to GitHub Pages
 ```

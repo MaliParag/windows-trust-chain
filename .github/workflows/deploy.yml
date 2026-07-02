@@ -39,6 +39,11 @@ jobs:
       - name: Build
         run: mdbook build
 
+      - name: SEO (canonical, Open Graph, JSON-LD, sitemap, robots)
+        run: node tools/gen-seo.mjs
+        env:
+          SITE_URL: https://maliparag.github.io/windows-trust-chain
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
