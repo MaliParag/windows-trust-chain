@@ -1,51 +1,35 @@
-/* The Windows Trust Chain -- mdBook theme overrides.
- *
- * Restores the print/HTML edition's designed components (trust ledger, named
- * callouts, evidence certificates, provenance colors) on top of mdBook. The
- * classes are emitted by tools/mdbook-trustchain.mjs; the palette mirrors
- * book/assets/book.css and adapts to the mdBook theme the reader selects. */
+/* The Windows Trust Chain — mdBook theme overrides.
+   Ports the print book's designed components (trust ledger, named callouts,
+   evidence certificates, figures) that tools/mdbook-trustchain.mjs emits, using
+   mdBook's per-theme variables so light (light, rust) and dark (navy, coal, ayu)
+   themes both read well. */
 
-/* --- Palette ------------------------------------------------------------- */
+/* Provenance colors, keyed off mdBook's theme classes on <html>. */
 :root {
-    --tc-accent: #7a1f2b;
-    --tc-rule: rgba(120, 110, 100, 0.28);
-    --tc-surface: rgba(120, 110, 100, 0.08);
-    --cap-ink: #15703b;  --cap-bg: #e9f3ec;
-    --emu-ink: #8a5a12;  --emu-bg: #f6eeda;
-    --doc-ink: #1f557f;  --doc-bg: #e7eff6;
-    --warn-ink: #a23b2c; --warn-bg: #f7ece9;
+    --tc-cap-ink: #15703b; --tc-cap-bg: #e9f3ec;
+    --tc-emu-ink: #8a5a12; --tc-emu-bg: #f6eeda;
+    --tc-doc-ink: #1f557f; --tc-doc-bg: #e7eff6;
+    --tc-def: #2b5d8a;
+    --tc-quote: #6a7b52;
+    --tc-warn-ink: #a23b2c; --tc-warn-bg: #f7ece9;
 }
-
-/* mdBook's dark themes carry these class names on <html>. */
 .navy, .coal, .ayu {
-    --tc-accent: #d98a94;
-    --tc-rule: rgba(200, 200, 200, 0.16);
-    --tc-surface: rgba(200, 200, 200, 0.06);
-    --cap-ink: #6fcf97;  --cap-bg: #13241a;
-    --emu-ink: #d8a657;  --emu-bg: #241c10;
-    --doc-ink: #7fb0d8;  --doc-bg: #101a24;
-    --warn-ink: #e0a59b; --warn-bg: #241412;
+    --tc-cap-ink: #6fcf97; --tc-cap-bg: #13241a;
+    --tc-emu-ink: #d8a657; --tc-emu-bg: #241c10;
+    --tc-doc-ink: #7fb0d8; --tc-doc-bg: #101a24;
+    --tc-def: #6c9cc7;
+    --tc-quote: #9bb06f;
+    --tc-warn-ink: #d98a7e; --tc-warn-bg: #241412;
 }
 
-/* --- Headings ------------------------------------------------------------ */
-.content h1 {
-    border-bottom: 2px solid var(--tc-accent);
-    padding-bottom: 0.3rem;
-}
-.content h2 {
-    border-left: 3px solid var(--tc-accent);
-    padding-left: 0.6rem;
-    margin-left: -0.75rem;
-}
-
-/* --- Trust ledger -------------------------------------------------------- */
+/* --- Trust ledger: the signature boxed sidebar opening each chapter. ------ */
 .trust-ledger {
     margin: 1.8rem 0;
     padding: 0.9rem 1.2rem 0.7rem;
-    border: 1px solid var(--tc-rule);
-    border-left: 4px solid var(--tc-accent);
+    border: 1px solid var(--quote-border, rgba(128, 128, 128, 0.3));
+    border-left: 4px solid var(--links, #4a86c7);
     border-radius: 0 5px 5px 0;
-    background: var(--tc-surface);
+    background: var(--quote-bg, rgba(128, 128, 128, 0.1));
     font-size: 0.95em;
 }
 .trust-ledger::before {
@@ -55,76 +39,40 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--tc-accent);
+    color: var(--links, #4a86c7);
     margin-bottom: 0.5rem;
 }
 .trust-ledger ul { margin: 0; padding-left: 1.1rem; list-style: none; }
-.trust-ledger li { margin: 0.25rem 0; }
-.trust-ledger li > strong:first-child { color: var(--tc-accent); }
+.trust-ledger li { margin: 0.3rem 0; }
+.trust-ledger li > strong:first-child { color: var(--links, #4a86c7); }
 
-/* --- Named callouts ------------------------------------------------------ */
+/* --- Named callouts: colored left rule + soft tint. ---------------------- */
 .callout {
     margin: 1.5rem 0;
     padding: 0.7rem 1.1rem;
-    border-left: 3px solid var(--tc-accent);
+    border-left: 3px solid var(--links, #4a86c7);
     border-radius: 0 4px 4px 0;
-    background: var(--tc-surface);
+    background: var(--quote-bg, rgba(128, 128, 128, 0.1));
 }
 .callout > :first-child { margin-top: 0; }
 .callout > :last-child { margin-bottom: 0; }
-.callout-definition  { border-left-color: #2b5d8a; }
-.callout-insight     { border-left-color: var(--tc-accent); }
-.callout-aside       { border-left-color: var(--tc-rule); }
-.callout-note        { border-left-color: var(--tc-rule); }
-.callout-quote       { border-left-color: #6a7b52; font-style: italic; }
-.callout-foundations { border-left-color: #2b5d8a; }
+.callout-definition  { border-left-color: var(--tc-def); }
+.callout-foundations { border-left-color: var(--tc-def); }
+.callout-insight     { border-left-color: var(--links, #4a86c7); }
+.callout-aside       { border-left-color: var(--icons, #888); }
+.callout-note        { border-left-color: var(--icons, #888); }
+.callout-quote       { border-left-color: var(--tc-quote); font-style: italic; }
 .callout-warning {
-    border-left-color: var(--warn-ink);
-    background: var(--warn-bg);
+    border-left-color: var(--tc-warn-ink);
+    background: var(--tc-warn-bg);
 }
 
-/* --- Evidence certificate: header band welded to the code block ---------- */
-.evidence {
-    margin: 1.6rem 0 0;
-    padding: 0.55rem 0.9rem;
-    border: 1px solid var(--tc-rule);
-    border-radius: 5px 5px 0 0;
-    font-size: 0.9em;
-}
-.evidence > :first-child { margin-top: 0; }
-.evidence > :last-child { margin-bottom: 0; }
-.evidence + pre {
-    margin-top: 0;
-    border-top: 0;
-    border-radius: 0 0 5px 5px;
-}
-.evidence-captured   { background: var(--cap-bg); border-color: var(--cap-ink); border-left: 4px solid var(--cap-ink); }
-.evidence-captured + pre   { border-color: var(--cap-ink); border-left: 4px solid var(--cap-ink); }
-.evidence-emulated   { background: var(--emu-bg); border-color: var(--emu-ink); border-left: 4px solid var(--emu-ink); }
-.evidence-emulated + pre   { border-color: var(--emu-ink); border-left: 4px solid var(--emu-ink); }
-.evidence-documented { background: var(--doc-bg); border-color: var(--doc-ink); border-left: 4px solid var(--doc-ink); }
-.evidence-documented + pre { border-color: var(--doc-ink); border-left: 4px solid var(--doc-ink); }
-
-/* --- Diagrams ------------------------------------------------------------
-   Figures are print-oriented SVGs (dark strokes, often transparent ground).
-   Put them on a light card so they stay legible under the dark themes too. */
-.content img[src$=".svg"] {
-    display: block;
-    max-width: 100%;
-    margin: 1.25rem auto;
-    background: #ffffff;
-    padding: 0.75rem;
-    border-radius: 6px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-}
-
-/* Diagram-in-prose figure box. */
+/* --- Diagram-in-prose figure. -------------------------------------------- */
 .figure-prose {
     margin: 1.6rem 0;
     padding: 0.9rem 1.2rem;
-    border: 1px solid var(--tc-rule);
+    border: 1px solid var(--quote-border, rgba(128, 128, 128, 0.3));
     border-radius: 5px;
-    background: var(--tc-surface);
     text-align: center;
 }
 .figure-prose::before {
@@ -134,8 +82,59 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--tc-rule);
+    color: var(--icons, #888);
     margin-bottom: 0.4rem;
+}
+
+/* --- Evidence certificate: header band welded to the captured code block. - */
+.evidence {
+    margin: 1.6rem 0 0;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--quote-border, rgba(128, 128, 128, 0.3));
+    border-radius: 5px 5px 0 0;
+    font-size: 0.9em;
+}
+.evidence > :first-child { margin-top: 0; }
+.evidence > :last-child { margin-bottom: 0; }
+.evidence p { margin: 0.15rem 0; }
+
+/* The code block mdBook renders next is welded on (rounded only at the bottom).
+   `pre + pre` covers mdBook wrapping the code in a <pre class="playground">. */
+.evidence + pre {
+    margin-top: 0;
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+.evidence-captured   { background: var(--tc-cap-bg); border-color: var(--tc-cap-ink); border-left: 4px solid var(--tc-cap-ink); }
+.evidence-captured + pre   { border-left: 4px solid var(--tc-cap-ink); }
+.evidence-emulated   { background: var(--tc-emu-bg); border-color: var(--tc-emu-ink); border-left: 4px solid var(--tc-emu-ink); }
+.evidence-emulated + pre   { border-left: 4px solid var(--tc-emu-ink); }
+.evidence-documented { background: var(--tc-doc-bg); border-color: var(--tc-doc-ink); border-left: 4px solid var(--tc-doc-ink); }
+.evidence-documented + pre { border-left: 4px solid var(--tc-doc-ink); }
+
+/* An evidence header not welded to a code block gets full rounding + margin. */
+.evidence-standalone {
+    margin-bottom: 1.6rem;
+    border-radius: 5px;
+}
+
+/* --- Diagrams: print SVGs on a light card so dark strokes stay legible. --- */
+.content img[src$=".svg"] {
+    display: block;
+    max-width: 100%;
+    margin: 1.25rem auto;
+    background: #ffffff;
+    padding: 0.75rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+.content figure { margin: 1.5rem 0; }
+.content figcaption {
+    font-size: 0.85em;
+    opacity: 0.75;
+    text-align: center;
+    margin-top: 0.4rem;
 }
 
 /* Wide reference/evidence tables should scroll rather than overflow. */
