@@ -1,7 +1,7 @@
 [book]
 title = "The Windows Trust Chain"
 authors = ["Parag Mali"]
-description = "How modern Windows builds an unbroken chain of trust from silicon to cloud, and where attackers break it. Evidence-based, reproducible."
+description = "How modern Windows builds a verifiable chain of trust from silicon to cloud, and where attackers break it. An open, evidence-based technical book."
 src = "src"
 language = "en"
 

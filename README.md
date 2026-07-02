@@ -1,6 +1,6 @@
 # The Windows Trust Chain
 
-**How modern Windows builds an unbroken, verifiable chain of trust from silicon to cloud, and where attackers break it.**
+**How modern Windows builds a verifiable chain of trust from silicon to cloud, and where attackers break it.**
 
 This is the source for an open, evidence-based technical book aimed at security
 architects, detection leads, threat modelers, and advanced blue teams. It follows
