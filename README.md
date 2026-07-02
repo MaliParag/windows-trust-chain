@@ -12,7 +12,7 @@ Where a claim can be checked on a live machine, the book gives the exact command
 to reproduce it and, where the output was captured, a cryptographic hash that
 proves it was not edited to fit the prose.
 
-> **Read it online:** _(published via GitHub Pages once the repository is public)_
+> **Read it online:** **<https://maliparag.github.io/windows-trust-chain/>**
 
 ## What is in here
 
