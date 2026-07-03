@@ -2,6 +2,11 @@
 
 **How modern Windows builds a verifiable chain of trust from silicon to cloud, and where attackers break it.**
 
+> ⚠️ **Preview edition.** This book is a work in progress: content may change
+> and may still contain errors. Corrections are welcome via
+> [issues](https://github.com/MaliParag/windows-trust-chain/issues) and
+> [pull requests](CONTRIBUTING.md).
+
 This is the source for an open, evidence-based technical book aimed at security
 architects, detection leads, threat modelers, and advanced blue teams. It follows
 trust as it is *inherited* link by link, from firmware and the TPM up through the

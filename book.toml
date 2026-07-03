@@ -20,6 +20,7 @@ git-repository-url = "https://github.com/MaliParag/windows-trust-chain"
 git-repository-icon = "fa-github"
 edit-url-template = "https://github.com/MaliParag/windows-trust-chain/edit/main/{path}"
 additional-css = ["theme/trustchain.css"]
+additional-js = ["theme/preview-banner.js"]
 # For a GitHub Pages *project* site served at /<repo>/. Change if hosted elsewhere.
 site-url = "/windows-trust-chain/"
 no-section-label = false

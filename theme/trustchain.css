@@ -22,6 +22,22 @@
     --tc-warn-ink: #d98a7e; --tc-warn-bg: #241412;
 }
 
+/* --- Preview banner: injected on every page by theme/preview-banner.js. ---- */
+#preview-banner {
+    margin: 0 0 1.6rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--tc-emu-ink);
+    border-left: 4px solid var(--tc-emu-ink);
+    border-radius: 6px;
+    background: var(--tc-emu-bg);
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+#preview-banner strong { color: var(--tc-emu-ink); }
+@media print {
+    #preview-banner { display: none; }
+}
+
 /* --- Trust ledger: the signature boxed sidebar opening each chapter. ------ */
 .trust-ledger {
     margin: 1.8rem 0;
