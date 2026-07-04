@@ -47,6 +47,9 @@ jobs:
         env:
           SITE_URL: https://maliparag.github.io/windows-trust-chain
 
+      - name: Bake read-along (audio + word highlighting)
+        run: python3 tools/batch_readalong.py
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
