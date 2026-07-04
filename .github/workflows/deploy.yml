@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Install Node dependencies
+        run: npm ci
+
       - name: Install mdBook
         run: |
           mkdir -p "$HOME/.local/bin"

@@ -28,6 +28,8 @@
  */
 'use strict';
 
+import katex from 'katex';
+
 const GREEN = '\u{1F7E2}'; // CAPTURED
 const YELLOW = '\u{1F7E1}'; // EMULATED
 const BLUE = '\u{1F535}'; // DOCUMENTED
@@ -170,7 +172,34 @@ function convertBlockquotes(lines) {
   return out;
 }
 
+// Render TeX math to HTML at build time (KaTeX), BEFORE mdBook's CommonMark
+// parser can mangle `$...$` (e.g. eat `_` subscripts). Code spans/blocks are
+// matched first in the alternation so `$` inside them is never treated as math.
+const MATH_RE = new RegExp(
+  '(```[\\s\\S]*?```|~~~[\\s\\S]*?~~~|`[^`\\n]*`)' +      // 1: code (protected)
+  '|\\$\\$([\\s\\S]+?)\\$\\$' +                            // 2: display math
+  '|(?<![\\\\$])\\$(?!\\s)((?:\\\\.|[^$\\\\\\n])+?)(?<!\\s)\\$(?!\\d)', // 3: inline
+  'g');
+
+function renderMath(content) {
+  return content.replace(MATH_RE, (m, code, disp, inl) => {
+    if (code !== undefined) return code; // leave code untouched
+    try {
+      if (disp !== undefined) {
+        const html = katex.renderToString(disp.trim(),
+          { displayMode: true, throwOnError: false, output: 'html', strict: false });
+        return `\n\n<div class="katex-block">${html}</div>\n\n`;
+      }
+      return katex.renderToString(inl,
+        { displayMode: false, throwOnError: false, output: 'html', strict: false });
+    } catch (e) {
+      return m; // on any failure, leave the original text
+    }
+  });
+}
+
 function transform(content) {
+  content = renderMath(content);
   let lines = content.split('\n');
   lines = convertTrustLedger(lines);
   lines = convertBlockquotes(lines);
